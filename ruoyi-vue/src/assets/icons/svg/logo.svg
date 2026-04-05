@@ -1,0 +1,31 @@
+<!-- Custom Solar Tech Logo -->
+<svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="logoBlue" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#60a5fa" />
+            <stop offset="100%" stop-color="#2563eb" />
+        </linearGradient>
+        <linearGradient id="logoSun" x1="0.5" y1="0" x2="0.5" y2="1">
+            <stop offset="0%" stop-color="#fef08a" />
+            <stop offset="100%" stop-color="#eab308" />
+        </linearGradient>
+        <filter id="logoGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
+    </defs>
+
+    <!-- Outer Hexagon Ring -->
+    <path d="M100 10 L180 55 V145 L100 190 L20 145 V55 Z" stroke="url(#logoBlue)" stroke-width="4" fill="rgba(30, 64, 175, 0.2)" />
+
+    <!-- Inner Solar Panel Grid (Bottom) -->
+    <path d="M35 135 L100 175 L165 135 L130 100 L100 115 L70 100 Z" fill="url(#logoBlue)" opacity="0.8" />
+    <path d="M100 115 V175 M70 100 L60 150 M130 100 L140 150" stroke="#1e40af" stroke-width="2" />
+
+    <!-- Rising Sun (Top) -->
+    <circle cx="100" cy="80" r="35" fill="url(#logoSun)" filter="url(#logoGlow)" />
+
+    <!-- Connection Tech Lines -->
+    <path d="M35 135 L20 145 M165 135 L180 145 M100 10 L100 30" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" />
+    <circle cx="100" cy="115" r="4" fill="#fff" filter="url(#logoGlow)" />
+</svg>

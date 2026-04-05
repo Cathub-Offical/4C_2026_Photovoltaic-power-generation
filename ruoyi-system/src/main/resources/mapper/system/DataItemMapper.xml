@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.DataItemMapper">
+
+    <resultMap type="com.ruoyi.system.domain.DataItem" id="DataItemResult">
+        <result property="deviceId" column="device_id"/>
+        <result property="timeCode" column="time_code"/>
+        <result property="timeType" column="time_type"/>
+        <result property="dataTime" column="data_time"/>
+        <result property="beginTime" column="begin_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="value" column="value"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+    </resultMap>
+
+    <sql id="selectDataItemVo">
+        select device_id, time_code, time_type, data_time, begin_time, end_time, value, 
+               remark, create_time, create_by, update_time, update_by
+        from data_item
+    </sql>
+
+    <select id="selectDataItemList" parameterType="com.ruoyi.system.domain.DataItem" resultMap="DataItemResult">
+        <include refid="selectDataItemVo"/>
+        <where>
+            <if test="deviceId != null and deviceId != ''">
+                AND device_id = #{deviceId}
+            </if>
+            <if test="timeType != null and timeType != ''">
+                AND time_type = #{timeType}
+            </if>
+        </where>
+        order by data_time desc
+    </select>
+
+    <select id="selectDataItemByDeviceAndTimeType" resultMap="DataItemResult">
+        <include refid="selectDataItemVo"/>
+        where device_id = #{deviceId}
+        and time_type = #{timeType}
+        <if test="startTime != null and startTime != ''">
+            AND data_time >= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND data_time &lt;= #{endTime}
+        </if>
+        order by data_time asc
+    </select>
+
+    <select id="selectDeviceGenerationStats" resultType="java.util.Map">
+        SELECT 
+            d.name as deviceName,
+            d.id as deviceId,
+            COALESCE(SUM(di.value), 0) as sumValue
+        FROM device d
+        LEFT JOIN data_item di ON d.id = di.device_id 
+            AND di.time_type = #{timeType}
+            <if test="year != null and year != ''">
+                AND YEAR(di.data_time) = #{year}
+            </if>
+            <if test="month != null and month != ''">
+                AND MONTH(di.data_time) = #{month}
+            </if>
+        <where>
+            <if test="deviceId != null and deviceId != ''">
+                AND d.id = #{deviceId}
+            </if>
+        </where>
+        GROUP BY d.id, d.name
+        ORDER BY sumValue DESC
+    </select>
+
+    <select id="selectDeviceSumValue" resultType="java.util.Map">
+        SELECT 
+            COALESCE(SUM(value), 0) as sumValue
+        FROM data_item
+        WHERE device_id = #{deviceId}
+    </select>
+
+    <select id="selectStationTimeSeries" resultType="java.util.Map">
+        SELECT
+            ps.id as powerStationId,
+            ps.name as powerStationName,
+            <choose>
+                <when test="'DAY'.equals(viewType)">DATE_FORMAT(di.data_time, '%Y-%m-%d %H') as timeBucket,</when>
+                <when test="'MONTH'.equals(viewType)">DATE_FORMAT(di.data_time, '%Y-%m-%d') as timeBucket,</when>
+                <otherwise>DATE_FORMAT(di.data_time, '%Y-%m') as timeBucket,</otherwise>
+            </choose>
+            COALESCE(SUM(di.value), 0) as sumValue
+        FROM power_station ps
+        LEFT JOIN device d ON d.power_station_id = ps.id AND d.ammeter = 0
+        LEFT JOIN data_item di ON di.device_id = d.id AND di.time_type = #{dbTimeType}
+            <if test="year != null and year != ''">AND YEAR(di.data_time) = #{year}</if>
+            <if test="month != null and month != '' and !'YEAR'.equals(viewType)">AND MONTH(di.data_time) = #{month}</if>
+            <if test="day != null and day != '' and 'DAY'.equals(viewType)">AND DAY(di.data_time) = #{day}</if>
+        <where>
+            <if test="powerStationId != null and powerStationId != ''">AND ps.id = #{powerStationId}</if>
+        </where>
+        GROUP BY ps.id, ps.name, timeBucket
+        ORDER BY ps.name ASC, timeBucket ASC
+    </select>
+
+    <select id="selectStationCompareData" resultType="java.util.Map">
+        SELECT
+            ps.id as powerStationId,
+            ps.name as powerStationName,
+            <choose>
+                <when test="'DAY'.equals(timeType)">DATE_FORMAT(di.data_time, '%Y-%m-%d') as timeBucket,</when>
+                <when test="'MONTH'.equals(timeType)">DATE_FORMAT(di.data_time, '%Y-%m') as timeBucket,</when>
+                <otherwise>YEAR(di.data_time) as timeBucket,</otherwise>
+            </choose>
+            COALESCE(SUM(di.value), 0) as sumValue
+        FROM power_station ps
+        LEFT JOIN device d ON d.power_station_id = ps.id AND d.ammeter = 0
+        LEFT JOIN data_item di ON di.device_id = d.id AND di.time_type = #{timeType}
+            <if test="startDate != null and startDate != ''">AND di.data_time >= #{startDate}</if>
+            <if test="endDate != null and endDate != ''">AND di.data_time &lt;= #{endDate}</if>
+        <where>
+            <if test="powerStationId != null and powerStationId != ''">AND ps.id = #{powerStationId}</if>
+        </where>
+        GROUP BY ps.id, ps.name, timeBucket
+        ORDER BY ps.name ASC, timeBucket ASC
+    </select>
+
+    <insert id="batchInsertDataItem">
+        insert into data_item (device_id, time_code, time_type, data_time, value, create_time)
+        values
+        <foreach item="item" collection="list" separator=",">
+            (#{item.deviceId}, #{item.timeCode}, #{item.timeType}, #{item.dataTime}, #{item.value}, sysdate())
+        </foreach>
+    </insert>
+
+    <delete id="deleteDataItemsByDeviceId">
+        delete from data_item where device_id = #{deviceId}
+    </delete>
+
+</mapper>

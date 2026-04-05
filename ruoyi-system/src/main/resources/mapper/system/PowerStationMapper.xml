@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.PowerStationMapper">
+    
+    <resultMap type="com.ruoyi.system.domain.PowerStation" id="PowerStationResult">
+        <result property="id"                column="id"                />
+        <result property="parentId"          column="parent_id"         />
+        <result property="code"              column="code"              />
+        <result property="name"              column="name"              />
+        <result property="subsidizedPrices"  column="subsidized_prices" />
+        <result property="installedCapacity" column="installed_capacity"/>
+        <result property="gridVoltage"       column="grid_voltage"      />
+        <result property="lon"               column="lon"               />
+        <result property="lat"               column="lat"               />
+        <result property="owningUserId"      column="owning_user_id"    />
+        <result property="remark"            column="remark"            />
+        <result property="createTime"        column="create_time"       />
+        <result property="createBy"          column="create_by"         />
+        <result property="updateTime"        column="update_time"       />
+        <result property="updateBy"          column="update_by"         />
+        <result property="userId"            column="user_id"           />
+        <result property="deptId"            column="dept_id"           />
+    </resultMap>
+
+    <sql id="selectPowerStationVo">
+        select id, parent_id, code, name, subsidized_prices, installed_capacity, grid_voltage, 
+               lon, lat, owning_user_id, remark, create_time, create_by, update_time, update_by, user_id, dept_id
+        from power_station
+    </sql>
+
+    <select id="selectPowerStationList" parameterType="com.ruoyi.system.domain.PowerStation" resultMap="PowerStationResult">
+        <include refid="selectPowerStationVo"/>
+        <where>
+            <if test="code != null and code != ''">
+                AND code like concat('%', #{code}, '%')
+            </if>
+            <if test="name != null and name != ''">
+                AND name like concat('%', #{name}, '%')
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+    
+    <select id="selectPowerStationById" parameterType="String" resultMap="PowerStationResult">
+        <include refid="selectPowerStationVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertPowerStation" parameterType="com.ruoyi.system.domain.PowerStation">
+        insert into power_station
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="parentId != null">parent_id,</if>
+            <if test="code != null">code,</if>
+            <if test="name != null">name,</if>
+            <if test="subsidizedPrices != null">subsidized_prices,</if>
+            <if test="installedCapacity != null">installed_capacity,</if>
+            <if test="gridVoltage != null">grid_voltage,</if>
+            <if test="lon != null">lon,</if>
+            <if test="lat != null">lat,</if>
+            <if test="owningUserId != null">owning_user_id,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="deptId != null">dept_id,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="parentId != null">#{parentId},</if>
+            <if test="code != null">#{code},</if>
+            <if test="name != null">#{name},</if>
+            <if test="subsidizedPrices != null">#{subsidizedPrices},</if>
+            <if test="installedCapacity != null">#{installedCapacity},</if>
+            <if test="gridVoltage != null">#{gridVoltage},</if>
+            <if test="lon != null">#{lon},</if>
+            <if test="lat != null">#{lat},</if>
+            <if test="owningUserId != null">#{owningUserId},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="deptId != null">#{deptId},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updatePowerStation" parameterType="com.ruoyi.system.domain.PowerStation">
+        update power_station
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="code != null">code = #{code},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="subsidizedPrices != null">subsidized_prices = #{subsidizedPrices},</if>
+            <if test="installedCapacity != null">installed_capacity = #{installedCapacity},</if>
+            <if test="gridVoltage != null">grid_voltage = #{gridVoltage},</if>
+            <if test="lon != null">lon = #{lon},</if>
+            <if test="lat != null">lat = #{lat},</if>
+            <if test="owningUserId != null">owning_user_id = #{owningUserId},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deletePowerStationById" parameterType="String">
+        delete from power_station where id = #{id}
+    </delete>
+
+    <delete id="deletePowerStationByIds" parameterType="String">
+        delete from power_station where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

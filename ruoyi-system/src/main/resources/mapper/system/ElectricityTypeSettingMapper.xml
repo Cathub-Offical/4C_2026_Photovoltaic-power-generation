@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.ElectricityTypeSettingMapper">
+
+    <resultMap type="com.ruoyi.system.domain.ElectricityTypeSetting" id="SettingResult">
+        <result property="id"         column="id"/>
+        <result property="beginTime"  column="begin_time"/>
+        <result property="endTime"    column="end_time"/>
+        <result property="remark"     column="remark"/>
+        <result property="createBy"   column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy"   column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap type="com.ruoyi.system.domain.ElectricityTypeSettingItem" id="ItemResult">
+        <result property="id"               column="id"/>
+        <result property="parentId"         column="parent_id"/>
+        <result property="type"             column="type"/>
+        <result property="electricityPrice" column="electricity_price"/>
+        <result property="beginTime"        column="begin_time"/>
+        <result property="endTime"          column="end_time"/>
+        <result property="remark"           column="remark"/>
+    </resultMap>
+
+    <select id="selectSettingList" parameterType="com.ruoyi.system.domain.ElectricityTypeSetting" resultMap="SettingResult">
+        SELECT id, begin_time, end_time, remark, create_by, create_time, update_by, update_time
+        FROM electricity_type_setting
+        <where>
+            <if test="params != null and params.beginTime != null and params.beginTime != ''">
+                AND begin_time &gt;= #{params.beginTime}
+            </if>
+            <if test="params != null and params.endTime != null and params.endTime != ''">
+                AND end_time &lt;= #{params.endTime}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectSettingById" parameterType="String" resultMap="SettingResult">
+        SELECT id, begin_time, end_time, remark, create_by, create_time
+        FROM electricity_type_setting WHERE id = #{id}
+    </select>
+
+    <insert id="insertSetting" parameterType="com.ruoyi.system.domain.ElectricityTypeSetting">
+        INSERT INTO electricity_type_setting (id, begin_time, end_time, remark, create_by, create_time)
+        VALUES (#{id}, #{beginTime}, #{endTime}, #{remark}, #{createBy}, NOW())
+    </insert>
+
+    <update id="updateSetting" parameterType="com.ruoyi.system.domain.ElectricityTypeSetting">
+        UPDATE electricity_type_setting
+        <set>
+            <if test="beginTime != null">begin_time = #{beginTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteSettingById" parameterType="String">
+        DELETE FROM electricity_type_setting WHERE id = #{id}
+    </delete>
+
+    <select id="selectItemsByParentId" parameterType="String" resultMap="ItemResult">
+        SELECT id, parent_id, type, electricity_price, begin_time, end_time, remark
+        FROM electricity_type_setting_item
+        WHERE parent_id = #{parentId}
+        ORDER BY begin_time ASC
+    </select>
+
+    <insert id="insertItems">
+        INSERT INTO electricity_type_setting_item
+            (id, parent_id, type, electricity_price, begin_time, end_time, remark, create_time)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.id}, #{item.parentId}, #{item.type}, #{item.electricityPrice},
+             #{item.beginTime}, #{item.endTime}, #{item.remark}, NOW())
+        </foreach>
+    </insert>
+
+    <delete id="deleteItemsByParentId" parameterType="String">
+        DELETE FROM electricity_type_setting_item WHERE parent_id = #{parentId}
+    </delete>
+
+</mapper>

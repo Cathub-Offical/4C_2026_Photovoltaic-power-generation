@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.InvLocMapper">
+
+    <resultMap type="com.ruoyi.system.domain.InvLoc" id="InvLocResult">
+        <result property="id" column="id"/>
+        <result property="location" column="location"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <select id="selectInvLocList" resultMap="InvLocResult">
+        SELECT id, location, create_by, create_time, update_by, update_time, remark
+        FROM inv_loc ORDER BY create_time DESC
+    </select>
+
+    <select id="selectInvLocById" parameterType="String" resultMap="InvLocResult">
+        SELECT id, location, create_by, create_time, update_by, update_time, remark
+        FROM inv_loc WHERE id = #{id}
+    </select>
+
+    <insert id="insertInvLoc" parameterType="com.ruoyi.system.domain.InvLoc">
+        INSERT INTO inv_loc (id, location, create_by, create_time, remark)
+        VALUES (#{id}, #{location}, #{createBy}, NOW(), #{remark})
+    </insert>
+
+    <update id="updateInvLoc" parameterType="com.ruoyi.system.domain.InvLoc">
+        UPDATE inv_loc
+        <set>
+            <if test="location != null and location != ''">location = #{location},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteInvLocById" parameterType="String">
+        DELETE FROM inv_loc WHERE id = #{id}
+    </delete>
+
+</mapper>

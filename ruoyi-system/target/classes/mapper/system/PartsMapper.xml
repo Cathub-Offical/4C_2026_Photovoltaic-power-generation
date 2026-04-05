@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.PartsMapper">
+
+    <resultMap type="com.ruoyi.system.domain.Parts" id="PartsResult">
+        <result property="id" column="id"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+        <result property="specs" column="specs"/>
+        <result property="locationId" column="location_id"/>
+        <result property="location" column="location"/>
+        <result property="amount" column="amount"/>
+        <result property="powerStationId" column="power_station_id"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap type="com.ruoyi.system.domain.PartsRecord" id="PartsRecordResult">
+        <result property="id" column="id"/>
+        <result property="partsId" column="parts_id"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+        <result property="specs" column="specs"/>
+        <result property="amount" column="amount"/>
+        <result property="locationId" column="location_id"/>
+        <result property="location" column="location"/>
+        <result property="status" column="status"/>
+        <result property="movementDate" column="movement_date"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <select id="selectPartsList" parameterType="com.ruoyi.system.domain.Parts" resultMap="PartsResult">
+        SELECT id, code, name, specs, location_id, location, amount, power_station_id, remark, create_by, create_time
+        FROM parts
+        <where>
+            <if test="name != null and name != ''">AND name LIKE CONCAT('%', #{name}, '%')</if>
+            <if test="code != null and code != ''">AND code LIKE CONCAT('%', #{code}, '%')</if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectPartsById" parameterType="String" resultMap="PartsResult">
+        SELECT id, code, name, specs, location_id, location, amount, power_station_id, remark, create_by, create_time
+        FROM parts WHERE id = #{id}
+    </select>
+
+    <insert id="insertParts" parameterType="com.ruoyi.system.domain.Parts">
+        INSERT INTO parts (id, code, name, specs, location_id, location, amount, power_station_id, remark, create_by, create_time)
+        VALUES (#{id}, #{code}, #{name}, #{specs}, #{locationId}, #{location}, #{amount}, #{powerStationId}, #{remark}, #{createBy}, NOW())
+    </insert>
+
+    <update id="updateParts" parameterType="com.ruoyi.system.domain.Parts">
+        UPDATE parts
+        <set>
+            <if test="code != null">code = #{code},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="specs != null">specs = #{specs},</if>
+            <if test="locationId != null">location_id = #{locationId},</if>
+            <if test="location != null">location = #{location},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deletePartsById" parameterType="String">
+        DELETE FROM parts WHERE id = #{id}
+    </delete>
+
+    <select id="selectPartsRecordList" parameterType="com.ruoyi.system.domain.PartsRecord" resultMap="PartsRecordResult">
+        SELECT id, parts_id, code, name, specs, amount, location_id, location, status, movement_date, remark, create_by, create_time
+        FROM parts_record
+        <where>
+            <if test="name != null and name != ''">AND name LIKE CONCAT('%', #{name}, '%')</if>
+            <if test="locationId != null and locationId != ''">AND location_id = #{locationId}</if>
+            <if test="status != null">AND status = #{status}</if>
+            <if test="startDate != null and startDate != ''">AND movement_date >= #{startDate}</if>
+            <if test="endDate != null and endDate != ''">AND movement_date &lt;= #{endDate}</if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <insert id="insertPartsRecord" parameterType="com.ruoyi.system.domain.PartsRecord">
+        INSERT INTO parts_record (id, parts_id, code, name, specs, amount, location_id, location, status, movement_date, remark, create_by, create_time)
+        VALUES (#{id}, #{partsId}, #{code}, #{name}, #{specs}, #{amount}, #{locationId}, #{location}, #{status}, #{movementDate}, #{remark}, #{createBy}, NOW())
+    </insert>
+
+</mapper>

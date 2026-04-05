@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.DeviceMapper">
+
+    <resultMap type="com.ruoyi.system.domain.Device" id="DeviceResult">
+        <result property="id" column="id"/>
+        <result property="powerStationId" column="power_station_id"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+        <result property="deviceTypeId" column="device_type_id"/>
+        <result property="capacity" column="capacity"/>
+        <result property="factory" column="factory"/>
+        <result property="ratedAcPower" column="rated_ac_power"/>
+        <result property="gridType" column="grid_type"/>
+        <result property="modulePeakPower" column="module_peak_power"/>
+        <result property="ammeter" column="ammeter"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="userId" column="user_id"/>
+        <result property="deptId" column="dept_id"/>
+    </resultMap>
+
+    <sql id="selectDeviceVo">
+        select id, power_station_id, code, name, device_type_id, capacity, factory, 
+               rated_ac_power, grid_type, module_peak_power, ammeter, remark, 
+               create_time, create_by, update_time, update_by, user_id, dept_id
+        from device
+    </sql>
+
+    <select id="selectDeviceList" parameterType="com.ruoyi.system.domain.Device" resultMap="DeviceResult">
+        <include refid="selectDeviceVo"/>
+        <where>
+            <if test="powerStationId != null and powerStationId != ''">
+                AND power_station_id = #{powerStationId}
+            </if>
+            <if test="name != null and name != ''">
+                AND name like concat('%', #{name}, '%')
+            </if>
+            <if test="code != null and code != ''">
+                AND code = #{code}
+            </if>
+            <if test="ammeter != null">
+                AND ammeter = #{ammeter}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectDeviceById" parameterType="String" resultMap="DeviceResult">
+        <include refid="selectDeviceVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectDeviceByPowerStationId" parameterType="String" resultMap="DeviceResult">
+        <include refid="selectDeviceVo"/>
+        where power_station_id = #{powerStationId}
+        order by create_time desc
+    </select>
+
+    <select id="selectInverterList" parameterType="String" resultMap="DeviceResult">
+        <include refid="selectDeviceVo"/>
+        where ammeter = 0
+        <if test="powerStationId != null and powerStationId != ''">
+            AND power_station_id = #{powerStationId}
+        </if>
+        order by create_time desc
+    </select>
+
+    <select id="selectAmmeterList" parameterType="String" resultMap="DeviceResult">
+        <include refid="selectDeviceVo"/>
+        where ammeter = 1
+        <if test="powerStationId != null and powerStationId != ''">
+            AND power_station_id = #{powerStationId}
+        </if>
+        order by create_time desc
+    </select>
+
+    <insert id="insertDevice" parameterType="com.ruoyi.system.domain.Device">
+        insert into device
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="powerStationId != null">power_station_id,</if>
+            <if test="code != null">code,</if>
+            <if test="name != null">name,</if>
+            <if test="deviceTypeId != null">device_type_id,</if>
+            <if test="capacity != null">capacity,</if>
+            <if test="factory != null">factory,</if>
+            <if test="ratedAcPower != null">rated_ac_power,</if>
+            <if test="gridType != null">grid_type,</if>
+            <if test="modulePeakPower != null">module_peak_power,</if>
+            <if test="ammeter != null">ammeter,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="deptId != null">dept_id,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="powerStationId != null">#{powerStationId},</if>
+            <if test="code != null">#{code},</if>
+            <if test="name != null">#{name},</if>
+            <if test="deviceTypeId != null">#{deviceTypeId},</if>
+            <if test="capacity != null">#{capacity},</if>
+            <if test="factory != null">#{factory},</if>
+            <if test="ratedAcPower != null">#{ratedAcPower},</if>
+            <if test="gridType != null">#{gridType},</if>
+            <if test="modulePeakPower != null">#{modulePeakPower},</if>
+            <if test="ammeter != null">#{ammeter},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="deptId != null">#{deptId},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateDevice" parameterType="com.ruoyi.system.domain.Device">
+        update device
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="powerStationId != null">power_station_id = #{powerStationId},</if>
+            <if test="code != null">code = #{code},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="deviceTypeId != null">device_type_id = #{deviceTypeId},</if>
+            <if test="capacity != null">capacity = #{capacity},</if>
+            <if test="factory != null">factory = #{factory},</if>
+            <if test="ratedAcPower != null">rated_ac_power = #{ratedAcPower},</if>
+            <if test="gridType != null">grid_type = #{gridType},</if>
+            <if test="modulePeakPower != null">module_peak_power = #{modulePeakPower},</if>
+            <if test="ammeter != null">ammeter = #{ammeter},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteDeviceById" parameterType="String">
+        delete from device where id = #{id}
+    </delete>
+
+    <delete id="deleteDeviceByIds" parameterType="String">
+        delete from device where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

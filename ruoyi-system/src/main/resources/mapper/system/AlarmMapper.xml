@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.AlarmMapper">
+
+    <resultMap type="com.ruoyi.system.domain.Alarm" id="AlarmResult">
+        <result property="id" column="id"/>
+        <result property="timeCode" column="time_code"/>
+        <result property="dataTime" column="data_time"/>
+        <result property="deviceCode" column="device_code"/>
+        <result property="errCode" column="err_code"/>
+        <result property="errorDescription" column="error_description"/>
+        <result property="solution" column="solution"/>
+        <result property="level" column="level"/>
+        <result property="status" column="status"/>
+        <result property="handlers" column="handlers"/>
+        <result property="handlersName" column="handlers_name"/>
+        <result property="processingTime" column="processing_time"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="imageUrl" column="image_url"/>
+        <result property="deviceName" column="device_name"/>
+        <result property="powerStationName" column="power_station_name"/>
+    </resultMap>
+
+    <select id="selectAlarmList" parameterType="com.ruoyi.system.domain.Alarm" resultMap="AlarmResult">
+        select a.id, a.time_code, a.data_time, a.device_code, a.err_code, a.error_description,
+               a.solution, a.level, a.status, a.handlers, a.handlers_name, a.processing_time,
+               a.remark, a.create_time, a.create_by, a.update_time, a.update_by, a.image_url,
+               d.name as device_name, ps.name as power_station_name
+        from alarm a
+        left join device d on a.device_code = d.code
+        left join power_station ps on d.power_station_id = ps.id
+        <where>
+            <if test="deviceCode != null and deviceCode != ''">
+                AND a.device_code = #{deviceCode}
+            </if>
+            <if test="level != null and level != 0">
+                AND a.level = #{level}
+            </if>
+            <if test="status != null and status != '' and status != '0'">
+                AND a.status = #{status}
+            </if>
+            <if test="errCode != null and errCode != ''">
+                AND a.err_code like concat('%', #{errCode}, '%')
+            </if>
+            <if test="deviceName != null and deviceName != ''">
+                AND d.name like concat('%', #{deviceName}, '%')
+            </if>
+            <if test="powerStationName != null and powerStationName != ''">
+                AND ps.name like concat('%', #{powerStationName}, '%')
+            </if>
+            <if test="params.beginTime != null and params.beginTime != ''">
+                AND a.data_time &gt;= #{params.beginTime}
+            </if>
+            <if test="params.endTime != null and params.endTime != ''">
+                AND a.data_time &lt;= concat(#{params.endTime}, ' 23:59:59')
+            </if>
+        </where>
+        order by a.data_time desc
+    </select>
+
+    <select id="selectAlarmById" parameterType="String" resultMap="AlarmResult">
+        select a.id, a.time_code, a.data_time, a.device_code, a.err_code, a.error_description,
+               a.solution, a.level, a.status, a.handlers, a.handlers_name, a.processing_time,
+               a.remark, a.create_time, a.create_by, a.update_time, a.update_by, a.image_url,
+               d.name as device_name, ps.name as power_station_name
+        from alarm a
+        left join device d on a.device_code = d.code
+        left join power_station ps on d.power_station_id = ps.id
+        where a.id = #{id}
+    </select>
+
+    <select id="countUnresolvedAlarm" resultType="int">
+        select count(*) from alarm where status = '1'
+    </select>
+
+    <insert id="insertAlarm" parameterType="com.ruoyi.system.domain.Alarm">
+        insert into alarm
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="timeCode != null">time_code,</if>
+            <if test="dataTime != null">data_time,</if>
+            <if test="deviceCode != null">device_code,</if>
+            <if test="errCode != null">err_code,</if>
+            <if test="errorDescription != null">error_description,</if>
+            <if test="solution != null">solution,</if>
+            <if test="level != null">level,</if>
+            <if test="status != null">status,</if>
+            <if test="handlers != null">handlers,</if>
+            <if test="handlersName != null">handlers_name,</if>
+            <if test="processingTime != null">processing_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="imageUrl != null">image_url,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="timeCode != null">#{timeCode},</if>
+            <if test="dataTime != null">#{dataTime},</if>
+            <if test="deviceCode != null">#{deviceCode},</if>
+            <if test="errCode != null">#{errCode},</if>
+            <if test="errorDescription != null">#{errorDescription},</if>
+            <if test="solution != null">#{solution},</if>
+            <if test="level != null">#{level},</if>
+            <if test="status != null">#{status},</if>
+            <if test="handlers != null">#{handlers},</if>
+            <if test="handlersName != null">#{handlersName},</if>
+            <if test="processingTime != null">#{processingTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="imageUrl != null">#{imageUrl},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateAlarm" parameterType="com.ruoyi.system.domain.Alarm">
+        update alarm
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="errorDescription != null">error_description = #{errorDescription},</if>
+            <if test="solution != null">solution = #{solution},</if>
+            <if test="level != null">level = #{level},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="handlers != null">handlers = #{handlers},</if>
+            <if test="handlersName != null">handlers_name = #{handlersName},</if>
+            <if test="processingTime != null">processing_time = #{processingTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="imageUrl != null">image_url = #{imageUrl},</if>
+            update_time = sysdate()
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAlarmById" parameterType="String">
+        delete from alarm where id = #{id}
+    </delete>
+
+    <delete id="deleteAlarmByIds" parameterType="String">
+        delete from alarm where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

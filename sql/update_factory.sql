@@ -1,0 +1,1 @@
+UPDATE device SET factory='启明星辰' WHERE ammeter=0;

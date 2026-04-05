@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.ElectricityDataItemMapper">
+
+    <resultMap type="com.ruoyi.system.domain.ElectricityDataItem" id="ElectricityDataItemResult">
+        <result property="deviceId" column="device_id"/>
+        <result property="dataTime" column="data_time"/>
+        <result property="type" column="type"/>
+        <result property="beginTime" column="begin_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="value" column="value"/>
+        <result property="cost" column="cost"/>
+        <result property="price" column="price"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+    </resultMap>
+
+    <sql id="selectElectricityDataItemVo">
+        select device_id, data_time, type, begin_time, end_time, value, cost, price,
+               remark, create_time, create_by, update_time, update_by
+        from electricity_data_item
+    </sql>
+
+    <select id="selectElectricityDataItemList" parameterType="com.ruoyi.system.domain.ElectricityDataItem" resultMap="ElectricityDataItemResult">
+        <include refid="selectElectricityDataItemVo"/>
+        <where>
+            <if test="deviceId != null and deviceId != ''">
+                AND device_id = #{deviceId}
+            </if>
+            <if test="type != null and type != ''">
+                AND type = #{type}
+            </if>
+        </where>
+        order by data_time desc
+    </select>
+
+    <select id="selectPeakValleyStats" resultType="java.util.Map">
+        SELECT 
+            DATE(data_time) as xdata,
+            COALESCE(SUM(CASE WHEN type = '尖' THEN value ELSE 0 END), 0) as ytip,
+            COALESCE(SUM(CASE WHEN type = '峰' THEN value ELSE 0 END), 0) as ypeak,
+            COALESCE(SUM(CASE WHEN type = '平' THEN value ELSE 0 END), 0) as yflat,
+            COALESCE(SUM(CASE WHEN type = '谷' THEN value ELSE 0 END), 0) as ytrough,
+            COALESCE(SUM(CASE WHEN type = '深谷' THEN value ELSE 0 END), 0) as ydeep
+        FROM electricity_data_item
+        <where>
+            <if test="deviceId != null and deviceId != ''">
+                AND device_id = #{deviceId}
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND data_time >= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND data_time &lt;= #{endTime}
+            </if>
+        </where>
+        GROUP BY DATE(data_time)
+        ORDER BY DATE(data_time)
+    </select>
+
+    <select id="selectPeakValleyReport" resultType="java.util.Map">
+        SELECT 
+            DATE(data_time) as dataTime,
+            type,
+            COALESCE(SUM(value), 0) as totalValue,
+            COALESCE(SUM(cost), 0) as totalCost,
+            AVG(price) as avgPrice
+        FROM electricity_data_item
+        <where>
+            <if test="deviceId != null and deviceId != ''">
+                AND device_id = #{deviceId}
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND data_time >= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND data_time &lt;= #{endTime}
+            </if>
+        </where>
+        GROUP BY DATE(data_time), type
+        ORDER BY DATE(data_time), type
+    </select>
+
+</mapper>
